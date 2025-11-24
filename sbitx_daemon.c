@@ -27,9 +27,6 @@ The initial sync between the gui values, the core radio values, settings, et al 
 #include <arpa/inet.h>
 #include <errno.h>
 #include <sys/file.h>
-#include <errno.h>
-#include <sys/file.h>
-#include <errno.h>
 #include <wiringPi.h>
 #include <wiringSerial.h>
 #include <signal.h>
@@ -148,7 +145,8 @@ struct console_line {
 	text_span_semantic spans[MAX_CONSOLE_LINE_STYLES];
 };
 static struct console_line console_stream[MAX_CONSOLE_LINES];
-int console_current_line = 0;
+int console_current_line = 0;           // ring buffer index
+static int console_line_counter = 0;    // monotonically increasing absolute line number
 struct Queue q_web;
 
 static uint8_t zbitx_available = 0;
@@ -180,7 +178,6 @@ void zbitx_write(int style, char *text);
 #define MIN_KEY_F6 0xFFC3
 #define MIN_KEY_F7 0xFFC4
 #define MIN_KEY_F8 0xFFC5
-#define MIN_KEY_F9 0xFFC6
 #define MIN_KEY_F9 0xFFC6
 #define MIN_KEY_F10 0xFFC7
 #define MIN_KEY_F11 0xFFC8
@@ -815,6 +812,7 @@ void console_init(){
 	assert(f);
 	f->is_dirty = TRUE;
 	console_current_line = 0;
+	console_line_counter = 0;
 }
 
 void web_add_string(char *string){
@@ -907,9 +905,8 @@ void  web_write(int style, char *data){
 }
 
 int console_init_next_line(){
-	console_current_line++;
-	if (console_current_line == MAX_CONSOLE_LINES)
-		console_current_line = 0;
+	console_line_counter++;
+	console_current_line = console_line_counter % MAX_CONSOLE_LINES;
 	memset(&console_stream[console_current_line], 0, sizeof(struct console_line));
 	return console_current_line;
 }
@@ -979,7 +976,7 @@ void write_console_semantic(const char *text, const text_span_semantic *sem, int
 	while (next_sem < sem + sem_count && next_sem->start_column == text_i) {
 	    text_span_semantic *out_sem = &console_line_spans[output_span_i];
 	    *out_sem = *next_sem; // copy whole struct
-	    out_sem->start_row = console_current_line; // only useful for output to spans file, and should increment forever (TODO)
+	    out_sem->start_row = console_line_counter; // absolute line number for downstream consumers
 	    //~ printf("write '%s': span %d col %d len %d: style %d\n",
 		//~ text, output_span_i, out_sem->start_column, out_sem->length, out_sem->semantic); // debug
 	    ++output_span_i;

@@ -5,10 +5,12 @@ BINDIR ?= $(PREFIX)/bin
 STATEDIR ?= /var/lib/$(OWNER)
 SHAREDIR ?= $(PREFIX)/share/$(OWNER)
 SOURCES = $(wildcard *.c)
-OBJECTS = $(SOURCES:.c=.o)
+CPP_SOURCES = $(wildcard *.cpp)
+OBJECTS = $(SOURCES:.c=.o) $(CPP_SOURCES:.cpp=.o)
 FFTOBJ = ft8_lib/.build/fft/kiss_fft.o ft8_lib/.build/fft/kiss_fftr.o
 HEADERS = $(wildcard *.h)
-CFLAGS = -I.
+CFLAGS = -I. -O2 -pipe -fno-omit-frame-pointer
+CXXFLAGS = $(CFLAGS)
 LIBS = -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread -lsqlite3 -lsystemd ft8_lib/libft8.a
 ifdef SBITX_UNUSED
 ## remove and print unused code
@@ -17,10 +19,12 @@ LIBS += -Wl,--gc-sections,--print-gc-sections
 endif
 ifdef SBITX_DEBUG
 CFLAGS += -ggdb3 -fsanitize=address
+CXXFLAGS += -ggdb3 -fsanitize=address
 LIBS += -fsanitize=address
 endif
 CC = gcc
-LINK = gcc
+CXX = g++
+LINK = $(CXX)
 STRIP = strip
 
 $(TARGET): create_configure.h $(OBJECTS) ft8_lib/libft8.a
@@ -28,6 +32,9 @@ $(TARGET): create_configure.h $(OBJECTS) ft8_lib/libft8.a
 
 .c.o: $(HEADERS)
 	$(CC) -c $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) -o $@ $<
+
+.cpp.o: $(HEADERS)
+	$(CXX) -c $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -o $@ $<
 
 create_configure.h:
 	$(shell echo "#define STATEDIR \"$(STATEDIR)\"" > configure.h) 
@@ -61,9 +68,10 @@ install: adduser
 	install -d --owner=$(OWNER) --group=$(OWNER) $(DESTDIR)/$(STATEDIR)
 	install -m 644 --owner=$(OWNER) --group=$(OWNER) data/default_hw_settings.ini $(DESTDIR)/$(STATEDIR)
 	install -m 644 --owner=$(OWNER) --group=$(OWNER) data/default_settings.ini $(DESTDIR)/$(STATEDIR)
+	[ -f $(DESTDIR)/$(STATEDIR)/grids.txt ] || install -m 644 --owner=$(OWNER) --group=$(OWNER) data/grids.txt $(DESTDIR)/$(STATEDIR)/grids.txt
 	install -d $(DESTDIR)/$(PREFIX)/lib/systemd/system/
 	install -m 644 systemd/zbitxd.service $(DESTDIR)/$(PREFIX)/lib/systemd/system
-	ln -sf /var/lib/zbitxd/grids.txt /usr/local/share/zbitxd/web/grids.txt
+	[ -f $(DESTDIR)/$(STATEDIR)/grids.txt ] && ln -sf $(DESTDIR)/$(STATEDIR)/grids.txt $(DESTDIR)/$(SHAREDIR)/web/grids.txt || true
 ifeq ("$(wildcard $(DESTDIR)/$(STATEDIR)/sbitx.db)","")
 	$(shell sqlite3 $(DESTDIR)/$(STATEDIR)/sbitx.db < data/create_db.sql)
 endif

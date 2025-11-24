@@ -1,0 +1,3 @@
+# Default grid list placeholder.
+# This file will be symlinked to the web directory so the grid map endpoint
+# always exists. Replace or update with your actual grids as needed.
