@@ -76,6 +76,15 @@ ifeq ("$(wildcard $(DESTDIR)/$(STATEDIR)/sbitx.db)","")
 	$(shell sqlite3 $(DESTDIR)/$(STATEDIR)/sbitx.db < data/create_db.sql)
 endif
 
+release: CFLAGS += -O2 -pipe -fno-omit-frame-pointer
+release: CXXFLAGS += -O2 -pipe -fno-omit-frame-pointer
+ifdef SBITX_FASTMATH
+release: CFLAGS += -ffast-math -march=native
+release: CXXFLAGS += -ffast-math -march=native
+endif
+release: $(TARGET)
+	$(STRIP) $(TARGET)
+
 uninstall:
 	rm -f $(DESTDIR)/$(BINDIR)/$(TARGET)
 	rm -rf $(DESTDIR)/$(SHAREDIR)

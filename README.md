@@ -186,6 +186,18 @@ What it does (****UNTESTED****):
 - Sets ownership to `zbitxd:zbitxd`.
 - Reloads systemd, enables, and restarts `zbitxd`.
 
+## Release build and optional fast-math (****UNTESTED****)
+For a stripped/optimized binary:
+```
+make release          # builds with -O2, strips binary
+SBITX_FASTMATH=1 make release   # adds -ffast-math -march=native
+sudo make install
+```
+Only use `SBITX_FASTMATH=1` if you’re OK with aggressive FP math opts on the Pi.
+
+## UTF-8 / console note (****UNTESTED****)
+The console currently assumes ASCII for wrapping/clipping. Avoid non-ASCII input, or extend `sbitx_daemon.c` console handling to be UTF-8 aware before relying on it for international text.
+
 # Additional extensions
 ## Automated WiFi AccessPoint
 
