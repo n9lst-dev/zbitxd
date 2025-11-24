@@ -174,14 +174,14 @@ What the script does (summary):
 
 Backups are stored under `/home/pi/zbitxd-backup-<timestamp>/`. A reboot is recommended to apply boot-config changes.
 
-## Post-install helper
+## Post-install helper (****UNTESTED****)
 After an install/upgrade, you can run the included helper to copy legacy data (if present) and restart the service:
 ```
 cd /home/pi/zbitxd   # or wherever you cloned
 chmod +x post_install_zbitxd.sh
 ./post_install_zbitxd.sh          # COPY_MODE=force to overwrite existing state
 ```
-What it does:
+What it does (****UNTESTED****):
 - Copies `/home/pi/sbitx/data/{sbitx.db,hw_settings.ini,user_settings.ini}` into `/var/lib/zbitxd` if missing (or overwrite with `COPY_MODE=force`).
 - Sets ownership to `zbitxd:zbitxd`.
 - Reloads systemd, enables, and restarts `zbitxd`.
