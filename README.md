@@ -149,6 +149,31 @@ To start automatically when booting, use this command:
 sudo systemctl enable zbitxd
 ```
 
+# In-place upgrade on the existing SD card
+If you want to upgrade an already-running zBitx without reflashing:
+
+1. Copy the installer script to the Pi (repo optional):  
+   `scp install_zbitxd_over_existing.sh pi@<pi-ip>:/home/pi/`
+
+2. SSH in and run (it will clone into `/home/pi/zbitxd` if missing):  
+   ```
+   ssh pi@<pi-ip>
+   chmod +x ~/install_zbitxd_over_existing.sh
+   REPO_DIR=/home/pi/zbitxd ~/install_zbitxd_over_existing.sh
+   sudo reboot
+   ```
+
+What the script does (summary):
+- Installs build/runtime deps; installs wiringPi (apt or source fallback).
+- Enables ALSA loopback (`snd-aloop`) now and on boot.
+- Updates `/boot/firmware/config.txt` (or `/boot/config.txt`) for GPIO/audio overlays; backs up the original.
+- Disables `fake-hwclock` to prefer RTC/system time.
+- Clones/updates this repo, runs `make && sudo make install`.
+- Seeds `/var/lib/zbitxd` with legacy `/home/pi/sbitx/data/{sbitx.db,hw_settings.ini,user_settings.ini}` if present; fixes ownership.
+- Reloads systemd, enables, and restarts `zbitxd`.
+
+Backups are stored under `/home/pi/zbitxd-backup-<timestamp>/`. A reboot is recommended to apply boot-config changes.
+
 # Additional extensions
 ## Automated WiFi AccessPoint
 
