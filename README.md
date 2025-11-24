@@ -198,6 +198,13 @@ Only use `SBITX_FASTMATH=1` if you’re OK with aggressive FP math opts on the P
 ## UTF-8 / console note (****UNTESTED****)
 The console currently assumes ASCII for wrapping/clipping. Avoid non-ASCII input, or extend `sbitx_daemon.c` console handling to be UTF-8 aware before relying on it for international text.
 
+## Grid map data (****UNTESTED****)
+To populate `grids.txt` with your actual logged grids, a helper is provided:
+```
+DB=/var/lib/zbitxd/sbitx.db OUT=/var/lib/zbitxd/grids.txt ./generate_grids.sh
+```
+This extracts distinct `exch_recv` values from the logbook (assumed to be Maidenhead grids), filters for valid 4-char grids, and writes them to `grids.txt` (owned by zbitxd). Adjust the query in the script if your schema differs.
+
 # Additional extensions
 ## Automated WiFi AccessPoint
 
