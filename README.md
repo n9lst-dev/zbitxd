@@ -205,6 +205,10 @@ DB=/var/lib/zbitxd/sbitx.db OUT=/var/lib/zbitxd/grids.txt ./generate_grids.sh
 ```
 This extracts distinct `exch_recv` values from the logbook (assumed to be Maidenhead grids), filters for valid 4-char grids, and writes them to `grids.txt` (owned by zbitxd). Adjust the query in the script if your schema differs.
 
+## FT8 smoke test (****UNTESTED****)
+Built target: `make test_ft8_smoke`
+Runs a minimal FT8 encode/decode sanity check using the bundled FT8 library. It is not a substitute for on-air testing, but can catch obvious build/runtime issues.
+
 # Additional extensions
 ## Automated WiFi AccessPoint
 

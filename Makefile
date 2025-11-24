@@ -85,6 +85,9 @@ endif
 release: $(TARGET)
 	$(STRIP) $(TARGET)
 
+test_ft8_smoke: test_ft8_smoke.o ft8_lib/libft8.a
+	$(LINK) -o $@ test_ft8_smoke.o $(FFTOBJ) $(LIBPATH) $(LIBS)
+
 uninstall:
 	rm -f $(DESTDIR)/$(BINDIR)/$(TARGET)
 	rm -rf $(DESTDIR)/$(SHAREDIR)
